@@ -70,7 +70,7 @@ const data = [
   };
   const createTable = () => {
     const table = document.createElement('table');
-    table.classList.add('table', 'table-striped'); 
+    table.classList.add('table', 'table-striped');
     const thead = document.createElement('thead');
     thead.insertAdjacentHTML('beforeend', `
       <tr>
@@ -175,7 +175,7 @@ const data = [
       form: form.form,
     };
   };
-  const createRow = ({ name: firstName, surname, phone }) => {
+  const createRow = ({name: firstName, surname, phone}) => {
     const tr = document.createElement('tr');
     tr.classList.add('contact');
     const tdDel = document.createElement('td');
@@ -184,11 +184,13 @@ const data = [
     buttonDel.classList.add('del-icon');
     tdDel.append(buttonDel);
     const tdName = document.createElement('td');
+    tdName.classList.add('td_name');
     tdName.textContent = firstName;
 
     const tdSurname = document.createElement('td');
+    tdSurname.classList.add('td_surname');
     tdSurname.textContent = surname;
-
+    
     const tdPhone = document.createElement('td');
     const phoneLink = document.createElement('a');
     phoneLink.href = `tel:${phone}`;
@@ -205,7 +207,6 @@ const data = [
     tr.append(tdDel, tdName, tdSurname, tdPhone, tdEdit);
     return tr;
   };
-
   const renderContacts = (elem, data) => {
     const allRow = data.map(createRow);
     elem.append(...allRow);
@@ -236,9 +237,8 @@ const data = [
     } = phoneBook;
       // Функционал
 
-    const allRow = renderContacts(list, data);
+    let allRow = renderContacts(list, data);
     hoverRow(allRow, logo);
-
     btnAdd.addEventListener('click', () => {
       formOverlay.classList.add('is-visible');
     });
@@ -260,7 +260,29 @@ const data = [
         target.closest('.contact').remove();
       };
     });
+    list.addEventListener('click', e => {
+      const target = e.target;
+      if (target.closest('.td_name')) {
+        data.sort((prev, next) => {
+          if (prev.name < next.name) return -1;
+          if (prev.name < next.name) return 1;
+        });
+        allRow.forEach((contact) => {
+          contact.remove();
+        });
+      }
+      if (target.closest('.td_surname')) {
+        data.sort((prev, next) => {
+          if (prev.surname < next.surname) return -1;
+          if (prev.surname < next.surname) return 1;
+        });
+        allRow.forEach((contact) => {
+          contact.remove();
+        });
+      }
+      allRow = renderContacts(list, data);
+    })
   };
-
+  
   window.phoneBookInit = init;
 };
