@@ -1,31 +1,31 @@
 'use strict';
-const data = [
-  {
-    name: 'Иван',
-    surname: 'Петров',
-    phone: '+79514545454',
-  },
-  {
-    name: 'Игорь',
-    surname: 'Семёнов',
-    phone: '+79999999999',
-  },
-  {
-    name: 'Семён',
-    surname: 'Иванов',
-    phone: '+79800252525',
-  },
-  {
-    name: 'Мария',
-    surname: 'Попова',
-    phone: '+79876543210',
-  },
-];
-{ 
-  const addContactData = contact => {
-    data.push(contact);
-    console.log('data', data);
-  };
+// const data = [
+//   {
+//     name: 'Иван',
+//     surname: 'Петров',
+//     phone: '+79514545454',
+//   },
+//   {
+//     name: 'Игорь',
+//     surname: 'Семёнов',
+//     phone: '+79999999999',
+//   },
+//   {
+//     name: 'Семён',
+//     surname: 'Иванов',
+//     phone: '+79800252525',
+//   },
+//   {
+//     name: 'Мария',
+//     surname: 'Попова',
+//     phone: '+79876543210',
+//   },
+// ];
+{
+  // const addContactData = contact => {
+  //   data.push(contact);
+  //   console.log('data', data);
+  // };
   const createContainer = () => {
     const container = document.createElement('div');
     container.classList.add('container');
@@ -196,6 +196,7 @@ const data = [
     
     const tdPhone = document.createElement('td');
     const phoneLink = document.createElement('a');
+    phoneLink.classList.add('phone');
     phoneLink.href = `tel:${phone}`;
     phoneLink.textContent = phone;
     tr.phoneLink = phoneLink;
@@ -257,9 +258,40 @@ const data = [
       const target = e.target;
       if (target.closest('.del-icon')) {
         target.closest('.contact').remove();
+        let phone = (target.closest('.contact').querySelector('.phone').textContent)
+        removeStorage(phone);
       }
     });
   };
+  function removeStorage(phone) {
+    let newdata = getStorage('data');
+    let dataindex;
+    newdata.forEach((data, index) => {
+      if (data.phone == phone) {
+        dataindex = index;
+      };
+    })
+    newdata.splice(dataindex, 1);
+    localStorage.setItem('data', JSON.stringify(newdata));
+  };
+  const getStorage = key => JSON.parse(localStorage.getItem(key)) || [];
+  const data = [];
+  let newdata = getStorage('data');
+  if (newdata.length === 0) {
+			newdata = data;
+		};
+  const setStorage = (key, obj) => {
+    let newdata = getStorage(key);
+
+    if (newdata.length === 0) {
+      newdata = data;
+      localStorage.setItem('data', JSON.stringify(newdata));
+    }
+
+    newdata.push(obj);
+    localStorage.setItem('data', JSON.stringify(newdata));
+  };
+  
   const addContactPage = (contact, list) => {
     list.append(createRow(contact));
   };
@@ -268,9 +300,9 @@ const data = [
       e.preventDefault();
       const formData = new FormData(e.target);
       const newContact = Object.fromEntries(formData);
-      console.log(newContact);
       addContactPage(newContact, list);
-      addContactData(newContact);
+      // addContactData(newContact);
+      setStorage('data', newContact);
       form.reset();
       closeModal();
     });
@@ -286,35 +318,37 @@ const data = [
       btnDel,
     } = renderPhoneBook(app, title);
       // Функционал
-
-    let allRow = renderContacts(list, data);
+    
     const {closeModal} = modalControl(btnAdd, formOverlay);
-
+    formControl(form, list, closeModal);
+    let allRow = renderContacts(list, newdata);
     hoverRow(allRow, logo);
     deleteControl(btnDel, list);
-    formControl(form, list, closeModal);
+    
     
     list.addEventListener('click', e => {
       const target = e.target;
       if (target.closest('.td_name')) {
-        data.sort((prev, next) => {
+        newdata.sort((prev, next) => {
           if (prev.name < next.name) return -1;
           if (prev.name < next.name) return 1;
         });
         allRow.forEach((contact) => {
           contact.remove();
         });
-        allRow = renderContacts(list, data);
+        allRow = renderContacts(list, newdata);
+        localStorage.setItem('data', JSON.stringify(newdata));
       }
       if (target.closest('.td_surname')) {
-        data.sort((prev, next) => {
+        newdata.sort((prev, next) => {
           if (prev.surname < next.surname) return -1;
           if (prev.surname < next.surname) return 1;
         });
         allRow.forEach((contact) => {
           contact.remove();
         });
-        allRow = renderContacts(list, data);
+        allRow = renderContacts(list, newdata);
+        localStorage.setItem('data', JSON.stringify(newdata));
     }
     });
   };
